@@ -4,7 +4,8 @@ import { DefaultButton } from "@fluentui/react";
 import Header from "./Header";
 import HeroList from "./HeroList";
 import Progress from "./Progress";
-
+import Query from "./Query"
+import openAIAPIKey from "../../config";
 /* global Word, require */
 
 export default class App extends React.Component {
@@ -12,6 +13,7 @@ export default class App extends React.Component {
     super(props, context);
     this.state = {
       listItems: [],
+      data: ''
     };
   }
 
@@ -33,22 +35,45 @@ export default class App extends React.Component {
       ],
     });
   }
-
-  click = async () => {
-    return Word.run(async (context) => {
-      /**
-       * Insert your Word code here
-       */
-
-      // insert a paragraph at the end of the document.
-      const paragraph = context.document.body.insertParagraph("Hello World", Word.InsertLocation.end);
-
-      // change the paragraph color to blue.
-      paragraph.font.color = "blue";
-
-      await context.sync();
+  
+  openaiFetchAPIResponse(prompt) {
+    console.log("Calling GPT3 for: " + prompt);
+    console.log("openAIAPIKey " + openAIAPIKey);
+    console.log("Calling API");
+    var url = "https://api.openai.com/v1/completions";
+    var bearer = 'Bearer ' + openAIAPIKey
+    var maxTokens = 2048;
+    console.log("maxTokens " + maxTokens);
+    //essentially maximum allowed as per OpenAI guidelines for this kind of work
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Authorization': bearer,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            "model": "text-davinci-003",
+            "prompt": prompt,
+            "max_tokens": maxTokens,
+        })
+  
+    }).then((response) => response.json())
+    .then((responseJson) => {
+       console.log(responseJson);
+       this.setState({
+          data: responseJson
+       })
+  
+    }).then(data => {
+  
+        console.log(data)
+  
+    }).catch(error => {
+  
+        console.log('Something bad happened ' + error)
+  
     });
-  };
+  }
 
   render() {
     const { title, isOfficeInitialized } = this.props;
@@ -67,17 +92,26 @@ export default class App extends React.Component {
       <div className="ms-welcome">
         <Header logo={require("./../../../assets/logo-filled.png")} title={this.props.title} message="Legal Lib AI" />
         <HeroList message="Make your query below:" items={this.state.listItems}>
-          <p className="ms-font-l">
-            Modify the source files, then click <b>Run</b>.
-          </p>
-          <DefaultButton className="ms-welcome__action" iconProps={{ iconName: "ChevronRight" }} onClick={this.click}>
-            Run
-          </DefaultButton>
         </HeroList>
+        <Query></Query>
+        <text>{this.state.data}</text>
       </div>
     );
   }
 }
+
+  // click = async () => {
+  //   return Word.run(async (context) => {
+
+  //     // insert a paragraph at the end of the document.
+  //     const paragraph = context.document.body.insertParagraph("Hello World", Word.InsertLocation.end);
+
+  //     // change the paragraph color to blue.
+  //     paragraph.font.color = "blue";
+
+  //     await context.sync();
+  //   });
+  // };
 
 App.propTypes = {
   title: PropTypes.string,
