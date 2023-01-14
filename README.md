@@ -16,11 +16,13 @@ Navigate to base folder and run
 
 `npm install`
 
-create a 'config.js' file in ./src with the following:
+create a `config.js` file in `./src` with the following:
 
-`const openAIAPIKey = "YOUR-API-KEY-HERE"
+```
+const openAIAPIKey = "YOUR-API-KEY-HERE"
 
-module.exports = openAIAPIKey`
+module.exports = openAIAPIKey
+```
 
 if you plan to continue sharing this code and wish to keep your API key private. If not, the key can be hardcoded however you like!
 
